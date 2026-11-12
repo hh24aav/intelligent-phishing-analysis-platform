@@ -1,4 +1,9 @@
-from flask import Flask, request
+from flask import Flask
+from flask import render_template
+from flask import request
+
+from services.url_analyser import analyse_url
+from services.risk_engine import calculate_risk
 
 app = Flask(__name__)
 
@@ -11,69 +16,36 @@ def home():
 
         url = request.form["url"]
 
-        score = 0
-        reasons = []
+        reasons = analyse_url(url)
 
-        if len(url) > 30:
-            score += 20
-            reasons.append("Long URL")
+        score, level = calculate_risk(
+            reasons
+        )
 
-        if "-" in url:
-            score += 20
-            reasons.append("Contains hyphens")
-
-        suspicious_words = [
-            "login",
-            "verify",
-            "secure",
-            "account",
-            "update",
-            "password"
-        ]
-
-        for word in suspicious_words:
-            if word in url.lower():
-                score += 15
-                reasons.append(f"Suspicious keyword: {word}")
-
-        if score >= 60:
-            level = "HIGH"
-        elif score >= 30:
-            level = "MEDIUM"
-        else:
-            level = "LOW"
-
-        result = f'''
+        result = f"""
         <h2>Analysis Result</h2>
 
-        Risk Score: {score}/100<br>
-        Risk Level: {level}<br><br>
+        Risk Score:
+        {score}/100
 
-        Reasons:<br>
-        {"<br>".join(reasons)}
-        '''
+        <br><br>
 
-    return f'''
-    <h1>Intelligent Phishing Analysis and Detection Platform</h1>
+        Risk Level:
+        {level}
 
-    <form method="POST">
+        <br><br>
 
-        <input
-            type="text"
-            name="url"
-            placeholder="Enter URL"
-            size="60">
+        Reasons:
 
-        <button type="submit">
-            Analyse
-        </button>
+        <br>
 
-    </form>
+        {'<br>'.join(reasons)}
+        """
 
-    <br>
-
-    {result}
-    '''
+    return render_template(
+        "index.html",
+        result=result
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)
