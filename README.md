@@ -15,16 +15,6 @@ Educational Security Recommendations
 Dashboard Statistics
 Machine Learning Enhancement
 
-Technologies
-Python
-Flask
-SQLite
-HTML
-CSS
-JavaScript
-GitHub
-ReportLab
-Scikit-learn
 
 Status
 Under Development
